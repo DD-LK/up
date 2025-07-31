@@ -1,0 +1,158 @@
+/*
+Create a Flutter pub plugin named `local_audio_scan` that scans and retrieves local music/audio files on Android only.
+
+====================================================================
+### GENERAL SPECIFICATIONS
+====================================================================
+- Type: Flutter plugin (federated structure acceptable, but only Android implementation required).
+- Language: Kotlin for Android native code.
+- Target: Flutter 3+ and Dart 3, null safety enabled.
+- Use `MediaStore` and `ContentResolver` to scan device storage for audio files.
+- Return clean, strongly typed Dart models.
+- Handle permissions gracefully for Android versions pre/post Android 13.
+- No iOS implementation required (document this clearly).
+
+====================================================================
+### CORE FEATURES
+====================================================================
+
+1. **Local Audio Scan**
+   - Query all music/audio files from device storage using `MediaStore.Audio.Media`.
+   - Extract metadata fields: 
+     - id
+     - title
+     - artist
+     - album
+     - duration
+     - file path
+     - mime type
+     - size
+     - date added
+   - Return results as a `List<AudioTrack>` in Dart.
+
+2. **Album Art Extraction**
+   - Extract embedded artwork if available.
+   - If missing, query `MediaStore.Audio.Albums` for album art.
+   - Return artwork as `Uint8List` (thumbnail).
+
+3. **Sorting and Filtering**
+   - Allow sorting by title, album, artist, date added.
+   - Allow filters (min duration, exclude folders, etc.).
+
+4. **Permissions**
+   - Handle runtime permissions:
+     - Pre-Android 13: `READ_EXTERNAL_STORAGE`
+     - Android 13+: `READ_MEDIA_AUDIO`
+   - Expose Dart API to request/check permissions.
+
+5. **Performance**
+   - Perform scanning off the UI thread using Kotlin coroutines.
+   - Handle large music libraries efficiently.
+   - (Optional) Expose progress updates via a Stream (“scanned X of Y”).
+
+====================================================================
+### DART API DESIGN
+====================================================================
+
+Define data models and scanner interface:
+
+class AudioTrack {
+  final String id;
+  final String title;
+  final String artist;
+  final String album;
+  final int duration;
+  final String filePath;
+  final String mimeType;
+  final int size;
+  final DateTime dateAdded;
+  final Uint8List? artwork;
+
+  AudioTrack({
+    required this.id,
+    required this.title,
+    required this.artist,
+    required this.album,
+    required this.duration,
+    required this.filePath,
+    required this.mimeType,
+    required this.size,
+    required this.dateAdded,
+    this.artwork,
+  });
+}
+
+class LocalAudioScanner {
+  /// Request necessary permissions
+  Future<bool> requestPermission();
+
+  /// Check if permission is granted
+  Future<bool> checkPermission();
+
+  /// Scan all audio tracks (optionally include artwork)
+  Future<List<AudioTrack>> scanTracks({bool includeArtwork = true});
+}
+
+====================================================================
+### PLUGIN STRUCTURE
+====================================================================
+- lib/local_audio_scan.dart → Public API
+- android/src/main/kotlin/.../LocalAudioScanPlugin.kt → Native logic
+- example/ → Demo Flutter app displaying scanned tracks
+- pubspec.yaml:
+  - Name: local_audio_scan
+  - Description: "Android-only Flutter package for scanning local audio files with album art extraction."
+  - Keywords: audio, music, android, scan, mediastore
+
+====================================================================
+### EXAMPLE APP (IN /example)
+====================================================================
+- Show list of tracks (title, artist, duration).
+- Display album art thumbnails.
+- Include scan/refresh button.
+- Handle permission request flow.
+
+====================================================================
+### DOCUMENTATION
+====================================================================
+- Provide a README.md covering:
+  - Installation
+  - Permissions setup
+  - Basic usage example
+  - Example output (code snippet)
+- Include dartdoc comments for public APIs.
+
+====================================================================
+### EXTRA FEATURES (OPTIONAL)
+====================================================================
+- Incremental scanning (detect new/removed tracks).
+- Support for scanning albums and artists.
+- Genre extraction via `MediaStore.Audio.Genres`.
+- Cache results using `sqflite` to reduce repeated scans.
+- Exclude certain folders (WhatsApp audio, system sounds).
+
+====================================================================
+### TESTING
+====================================================================
+- Write Dart unit tests for models and scanner logic.
+- Example app should visually verify scanning results.
+
+====================================================================
+### OUTPUT EXPECTATIONS
+====================================================================
+Generate:
+1. Full plugin folder structure.
+2. Dart models and API implementation.
+3. Kotlin code for scanning and permissions.
+4. Example app demonstrating usage.
+5. README.md and documentation.
+
+====================================================================
+### IMPORTANT NOTES
+====================================================================
+- Ensure `flutter pub publish --dry-run` passes.
+- Optimize `MediaStore` queries for speed and memory.
+- Clearly document Android-only limitation in README.
+- Follow modern Flutter plugin best practices (platform interface pattern optional).
+- Null safety mandatory, adhere to Dart 3 idioms.
+*/
