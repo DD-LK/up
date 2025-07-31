@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:local_audio_scan/local_audio_scan.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,9 +16,28 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final _localAudioScanner = LocalAudioScanner();
+  final _audioPlayer = AudioPlayer();
   List<AudioTrack> _audioTracks = [];
   bool _isLoading = false;
   String _status = 'Tap the button to scan for audio files.';
+  String? _currentlyPlaying;
+  PlayerState _playerState = PlayerState.stopped;
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlayer.onPlayerStateChanged.listen((state) {
+      setState(() {
+        _playerState = state;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
 
   Future<void> _scanAudioFiles() async {
     setState(() {
@@ -49,6 +69,27 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  Future<void> _play(String path) async {
+    await _audioPlayer.play(DeviceFileSource(path));
+    setState(() {
+      _currentlyPlaying = path;
+    });
+  }
+
+  Future<void> _pause() async {
+    await _audioPlayer.pause();
+    setState(() {
+      _currentlyPlaying = null;
+    });
+  }
+
+  Future<void> _stop() async {
+    await _audioPlayer.stop();
+    setState(() {
+      _currentlyPlaying = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -78,13 +119,23 @@ class _MyAppState extends State<MyApp> {
                 itemCount: _audioTracks.length,
                 itemBuilder: (context, index) {
                   final track = _audioTracks[index];
+                  final isPlaying = _currentlyPlaying == track.filePath && _playerState == PlayerState.playing;
                   return ListTile(
                     leading: track.artwork != null
                         ? Image.memory(track.artwork as Uint8List)
                         : const Icon(Icons.music_note),
                     title: Text(track.title),
                     subtitle: Text(track.artist),
-                    trailing: Text('${(track.duration / 1000).toStringAsFixed(2)}s'),
+                    trailing: IconButton(
+                      icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
+                      onPressed: () {
+                        if (isPlaying) {
+                          _pause();
+                        } else {
+                          _play(track.filePath);
+                        }
+                      },
+                    ),
                   );
                 },
               ),

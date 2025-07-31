@@ -16,6 +16,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  audioplayers: ^6.0.0
 
   local_audio_scan:
     # When depending on this package from a real application you should use:
