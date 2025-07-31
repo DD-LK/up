@@ -1,7 +1,7 @@
 name: local_audio_scan
 description: "Android-only Flutter package for scanning local audio files with album art extraction."
 repository: https://github.com/DD-LK/up/tree/main/local_audio_scan
-version: 0.0.1
+version: 1.3.3
 
 keywords:
   - audio
