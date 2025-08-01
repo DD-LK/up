@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
@@ -43,8 +42,11 @@ class LocalAudioScanner {
   }
 
   /// Scan all audio tracks (optionally include artwork)
-  Future<List<AudioTrack>> scanTracks({bool includeArtwork = true}) async {
-    final List<dynamic>? result = await _channel.invokeMethod('scanTracks', {'includeArtwork': includeArtwork});
+  Future<List<AudioTrack>> scanTracks({bool includeArtwork = true, bool filterJunkAudio = true}) async {
+    final List<dynamic>? result = await _channel.invokeMethod('scanTracks', {
+      'includeArtwork': includeArtwork,
+      'filterJunkAudio': filterJunkAudio,
+    });
     return result?.map((e) => AudioTrack(
       id: e['id'],
       title: e['title'],

@@ -8,7 +8,7 @@ Add `local_audio_scan` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  local_audio_scan: ^0.0.1 # Replace with the latest version
+  local_audio_scan: ^4.0.0
 ```
 
 Then run `flutter pub get`.
@@ -42,8 +42,8 @@ import 'package:local_audio_scan/local_audio_scan.dart';
 bool hasPermission = await LocalAudioScanner().requestPermission();
 
 if (hasPermission) {
-  // Scan for audio tracks
-  List<AudioTrack> tracks = await LocalAudioScanner().scanTracks();
+  // Scan for audio tracks, filtering out junk audio
+  List<AudioTrack> tracks = await LocalAudioScanner().scanTracks(filterJunkAudio: true);
 
   for (var track in tracks) {
     print('Title: ${track.title}, Artist: ${track.artist}');

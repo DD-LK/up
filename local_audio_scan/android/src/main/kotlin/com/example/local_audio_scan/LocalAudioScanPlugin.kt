@@ -44,8 +44,9 @@ class LocalAudioScanPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Re
         when (call.method) {
             "scanTracks" -> {
                 val includeArtwork = call.argument<Boolean>("includeArtwork") ?: true
+                val filterJunkAudio = call.argument<Boolean>("filterJunkAudio") ?: true
                 coroutineScope.launch {
-                    val tracks = scanAudioFiles(includeArtwork)
+                    val tracks = scanAudioFiles(includeArtwork, filterJunkAudio)
                     withContext(Dispatchers.Main) {
                         result.success(tracks)
                     }
@@ -71,7 +72,7 @@ class LocalAudioScanPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Re
         return ContextCompat.checkSelfPermission(context, requiredPermission) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun scanAudioFiles(includeArtwork: Boolean): List<Map<String, Any?>> {
+    private fun scanAudioFiles(includeArtwork: Boolean, filterJunkAudio: Boolean): List<Map<String, Any?>> {
         val tracks = mutableListOf<Map<String, Any?>>()
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
@@ -86,13 +87,17 @@ class LocalAudioScanPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Re
             MediaStore.Audio.Media.ALBUM_ID
         )
 
-        val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
+        val selection = StringBuilder("${MediaStore.Audio.Media.IS_MUSIC} != 0")
+        if (filterJunkAudio) {
+            selection.append(" AND ${MediaStore.Audio.Media.DATA} NOT LIKE '%/WhatsApp/%'")
+            selection.append(" AND ${MediaStore.Audio.Media.DATA} NOT LIKE '%/Call/%'")
+        }
         val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
 
         context.contentResolver.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             projection,
-            selection,
+            selection.toString(),
             null,
             sortOrder
         )?.use { cursor ->

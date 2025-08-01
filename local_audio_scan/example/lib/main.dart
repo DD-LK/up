@@ -22,6 +22,7 @@ class _MyAppState extends State<MyApp> {
   String _status = 'Tap the button to scan for audio files.';
   String? _currentlyPlaying;
   PlayerState _playerState = PlayerState.stopped;
+  bool _filterJunkAudio = true;
 
   @override
   void initState() {
@@ -48,7 +49,7 @@ class _MyAppState extends State<MyApp> {
     try {
       final hasPermission = await _localAudioScanner.requestPermission();
       if (hasPermission) {
-        final tracks = await _localAudioScanner.scanTracks();
+        final tracks = await _localAudioScanner.scanTracks(filterJunkAudio: _filterJunkAudio);
         setState(() {
           _audioTracks = tracks;
           _status = 'Found ${_audioTracks.length} tracks.';
@@ -83,13 +84,6 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  Future<void> _stop() async {
-    await _audioPlayer.stop();
-    setState(() {
-      _currentlyPlaying = null;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -105,6 +99,20 @@ class _MyAppState extends State<MyApp> {
                 children: [
                   Text(_status),
                   const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Filter Junk Audio'),
+                      Switch(
+                        value: _filterJunkAudio,
+                        onChanged: (value) {
+                          setState(() {
+                            _filterJunkAudio = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
                   ElevatedButton(
                     onPressed: _isLoading ? null : _scanAudioFiles,
                     child: _isLoading
