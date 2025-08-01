@@ -8,7 +8,7 @@ Add `local_audio_scan` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  local_audio_scan: ^4.0.0
+  local_audio_scan: ^2.0.0
 ```
 
 Then run `flutter pub get`.
